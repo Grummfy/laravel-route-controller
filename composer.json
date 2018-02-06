@@ -1,0 +1,34 @@
+{
+  "name": "grummfy/laravel-route-controller",
+  "description": "Define Router::controller() without breaking everything",
+  "type": "library",
+  "license": "MIT",
+  "keywords": [
+	"route",
+	"controller",
+	"laravel"
+  ],
+  "authors": [
+	{
+	  "name": "Grummfy",
+	  "email": "me@grummfy.be"
+	}
+  ],
+  "require": {
+	"illuminate/routing": "^5.5"
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "autoload": {
+	"psr-4": {
+	  "Grummfy\\LaravelRouteController\\": "src/"
+	}
+  },
+  "extra": {
+	"laravel": {
+	  "providers": [
+		"Grummfy\\LaravelRouteController\\RouteControllerProvider"
+	  ]
+	}
+  }
+}
