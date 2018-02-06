@@ -6,17 +6,29 @@ use Illuminate\Support\ServiceProvider;
 
 class RouteControllerProvider extends ServiceProvider
 {
-	protected $_controllerRouterClass = \Grummfy\LaravelRouteController\Route\ControllerRouter::class;
+	public function boot()
+	{
+		$this->publishes([
+			__DIR__ . '/../config/route-controller.php' => config_path('route-controller.php'),
+		], 'config');
+	}
 
 	public function register()
 	{
-		$controllerRouterClass = $this->_controllerRouterClass;
+		$this->mergeConfigFrom(__DIR__ . '/../config/route-controller.php', 'route-controller');
 
-		\Router::macro(
+		$controllerRouterClass = $this->app['config']->get('route-controller.controller_router');
+		$appBaseController = $this->app['config']->get('route-controller.app_base_controller');
+
+		$this->_registerMacro($controllerRouterClass, $appBaseController);
+	}
+
+	protected function _registerMacro($controllerRouterClass, $appBaseController)
+	{
+		\Route::macro(
 			'controller',
-			function($uri, $controller, array $options = array()) use ($controllerRouterClass)
+			function($uri, $controller, array $options = array()) use ($controllerRouterClass, $appBaseController)
 			{
-				$fullControllerName = $controller;
 				$namespace = '';
 
 				// first we check namespace and prefix for the roads
@@ -27,6 +39,7 @@ class RouteControllerProvider extends ServiceProvider
 					$namespace = isset($group[ 'namespace' ]) ? ($group[ 'namespace' ] . '\\') : $namespace;
 				}
 
+				$fullControllerName = $controller;
 				if (!class_exists($controller) && strpos($controller, '\\') !== 0)
 				{
 					$fullControllerName = $namespace . $controller;
@@ -38,16 +51,16 @@ class RouteControllerProvider extends ServiceProvider
 					$heritage = $options['heritage'];
 				}
 
-				$cr = new ($controllerRouterClass)($heritage);
+				$cr = new $controllerRouterClass($heritage, $appBaseController);
 				$routables = $cr->listRoutableActionFromController($fullControllerName);
 
 				foreach ($routables as $actionController => $potentialRoute)
 				{
 					// inherited : middleware, prefix, ...
 					$action = $options + [
-						'uses' => $actionController,
-						'as' => $potentialRoute[ 'name' ],
-					];
+							'uses' => $actionController,
+							'as' => $potentialRoute[ 'name' ],
+						];
 
 					if (method_exists($this, $potentialRoute[ 'verb' ]))
 					{

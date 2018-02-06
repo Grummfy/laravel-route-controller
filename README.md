@@ -16,6 +16,11 @@ Install the dependencies
 composer require grummfy/laravel-route-controller
 ```
 
+Publish the configuration
+```
+php artisan vendor:publish --tag=config --provider=Grummfy\LaravelRouteController\RouteControllerProvider
+```
+
 ## Usage
 
 Once the package is install and autodiscover (or you have added the provider manually), the package is ready to use.
@@ -29,6 +34,12 @@ It will take all the public method from the class (including traits) and convert
 There is a third argument that you can use to add extra option, like a middleware or anything else.
 ```
 Route::controller('/foo', \App\Http\Controllers\FooController::class, ['middleware' => 'can:baz']);
+```
+
+You got also an extra option, to don't allow heritance of methods from parent:
+
+```
+Route::controller('/foo', \App\Http\Controllers\FooController::class, ['middleware' => 'can:baz', 'heritage' => false]);
 ```
 
 ### Example
